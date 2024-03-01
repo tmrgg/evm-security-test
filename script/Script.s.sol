@@ -29,7 +29,7 @@ contract ResolutionScript is Script {
     }
 
     function solution() internal {
-        // write your solution here !
+        proxy = new Proxy(address(implementation));
     }
 
     function isSolved() internal view returns (bool) {
