@@ -30,6 +30,7 @@ contract ResolutionScript is Script {
 
     function solution() internal {
         // write your solution here !
+        
     }
 
     function isSolved() internal view returns (bool) {
